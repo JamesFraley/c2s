@@ -1,0 +1,8 @@
+bin/zookeeper-server-start.sh config/zookeeper.properties
+bin/kafka-server-start.sh config/server.properties
+java -jar ./target/kafdrop-2.0.6.jar --zookeeper.connect=127.0.0.1:2181
+cd /home/fraleyjd/projects/go/src/Kafdrop;
+    java -jar ./target/kafdrop-2.0.6.jar --zookeeper.connect=127.0.0.1:2181
+
+go get github.com/Shopify/sarama
+go get github.com/wvanbergen/kafka/consumergroup
