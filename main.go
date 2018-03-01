@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -43,17 +42,16 @@ func msgHandler() func(m *sarama.ConsumerMessage) error {
 		if len(m.Value) == 0 {
 			return nil
 		}
-		log.Print(m)
-		fmt.Printf("%s\n", m.BlockTimestamp)
-		fmt.Printf("%s\n", m.Headers)
-		fmt.Printf("Key=%s\n", m.Key)
-		fmt.Printf("Offset=%d\n", m.Offset)
-		fmt.Printf("Partition=%v\n", m.Partition)
-		fmt.Printf("%s\n", m.Timestamp)
-		fmt.Printf("%s\n", m.Topic)
-		fmt.Printf("%T\n", m.Value)
-		fmt.Printf("%s\n", m.Value)
-		fmt.Printf("\n\n")
+		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
+		log.Printf("Headers=%s\n", m.Headers)
+		log.Printf("Key=%s\n", m.Key)
+		log.Printf("Offset=%d\n", m.Offset)
+		log.Printf("Partition=%v\n", m.Partition)
+		log.Printf("Timestamp=%s\n", m.Timestamp)
+		log.Printf("Topic=%s\n", m.Topic)
+		log.Printf("Value.typeOf()=%T\n", m.Value)
+		log.Printf("Value=%s\n", m.Value)
+		log.Printf("\n\n")
 		return nil
 	}
 }
