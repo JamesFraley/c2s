@@ -2,36 +2,35 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/Shopify/sarama"
 )
 
-const (
-	hostPort  = "3000"
-	topicName = "kafka-example-topic"
-)
+var topicName string
 
 func main() {
-	producer, err := createKafkaProducer("127.0.0.1:9092")
+	topicName = os.Getenv("topicName")
+	zookeeperAddr := os.Getenv("zookeeperAddr")
+	log.Print(zookeeperAddr)
 
+	producer, err := createKafkaProducer(zookeeperAddr)
 	if err != nil {
 		log.Fatal("Failed to connect to Kafka")
 	}
 
 	//Ensures that the topic has been created in kafka
+	log.Println("Checking Topic...")
 	producer.Input() <- &sarama.ProducerMessage{
 		Key:       sarama.StringEncoder("init"),
 		Topic:     topicName,
 		Timestamp: time.Now(),
 	}
 
-	log.Println("Creating Topic...")
-
 	for {
-		log.Print("----------------")
+		log.Print("Start consume.")
 		consumeMessages("127.0.0.1:2181", msgHandler())
-		log.Print("~~~~~~~~~~~~~~~~")
 	}
 
 }
