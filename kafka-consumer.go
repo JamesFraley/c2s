@@ -1,20 +1,22 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/Shopify/sarama"
+	_ "github.com/mattn/go-oci8"
 	"github.com/wvanbergen/kafka/consumergroup"
 )
 
 const consumerGroup = "group.testing"
 
-type messageHandler func(*sarama.ConsumerMessage) error
+type messageHandler func(*sarama.ConsumerMessage, *sql.DB) error
 
-func consumeMessages(zookeeperConn string, handler messageHandler) {
+func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB) {
 	log.Println("Starting Consumer")
 	config := consumergroup.NewConfig()
 	config.Offsets.Initial = sarama.OffsetOldest
@@ -48,7 +50,7 @@ func consumeMessages(zookeeperConn string, handler messageHandler) {
 	log.Println("Waiting for messages")
 	for message := range consumer.Messages() {
 		log.Printf("Topic: %s\t Partition: %v\t Offset: %v\n", message.Topic, message.Partition, message.Offset)
-		e := handler(message)
+		e := handler(message, db)
 		if e != nil {
 			log.Fatal(e)
 			consumer.Close()

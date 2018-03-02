@@ -13,7 +13,11 @@
          "port": 2345,
          "host": "127.0.0.1",
          "program": "${fileDirname}",
-         "env": {},
+         "env": {"topicName":"place", 
+                 "zookeeperAddr":"127.0.0.1:9092", 
+                 "oracleUser":"fraleyjd",
+                 "oraclePassword":"myPassword", 
+                 "oracleService":"orcl"},
          "args": [],
          "showLog": true
       }

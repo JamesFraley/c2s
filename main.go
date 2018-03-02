@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/Shopify/sarama"
+	_ "github.com/mattn/go-oci8"
 )
 
 var topicName string
@@ -13,7 +16,22 @@ var topicName string
 func main() {
 	topicName = os.Getenv("topicName")
 	zookeeperAddr := os.Getenv("zookeeperAddr")
-	log.Print(zookeeperAddr)
+	oracleUser := os.Getenv("oracleUser")
+	oraclePassword := os.Getenv("oraclePassword")
+	oracleService := os.Getenv("oracleService")
+
+	oracleConnectString := oracleUser + "/" + oraclePassword + "@" + oracleService
+	db, err := sql.Open("oci8", oracleConnectString)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+
+	if err = db.Ping(); err != nil {
+		fmt.Printf("Error connecting to the database: %s\n", err)
+		return
+	}
 
 	producer, err := createKafkaProducer(zookeeperAddr)
 	if err != nil {
@@ -30,17 +48,23 @@ func main() {
 
 	for {
 		log.Print("Start consume.")
-		consumeMessages("127.0.0.1:2181", msgHandler())
+		consumeMessages(zookeeperAddr, msgHandler(), db)
 	}
 
 }
 
-func msgHandler() func(m *sarama.ConsumerMessage) error {
-	return func(m *sarama.ConsumerMessage) error {
+func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
+	return func(m *sarama.ConsumerMessage, db *sql.DB) error {
 		// Empty body means it is an init message
 		if len(m.Value) == 0 {
 			return nil
 		}
+
+		if err := db.Ping(); err != nil {
+			fmt.Printf("Error connecting to the database: %s\n", err)
+			return err
+		}
+
 		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
 		log.Printf("Headers=%s\n", m.Headers)
 		log.Printf("Key=%s\n", m.Key)
