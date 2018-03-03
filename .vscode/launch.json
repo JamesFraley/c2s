@@ -18,12 +18,7 @@
                  "oracleUser":"fraleyjd",
                  "oraclePassword":"myPassword", 
                  "oracleService":"orcl"},
-         "args": ["topicName":"place",
-                  "zookeeperAddr":"127.0.0.1",
-                  "oracleUser":"fraleyjd",
-                  "oraclePassword":"myPassword",
-                  "oracleService":"orcl"
-                ],
+         "args": [],
          "showLog": true
       }
    ]
