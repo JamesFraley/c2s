@@ -50,7 +50,6 @@ func main() {
 		log.Print("Start consume.")
 		consumeMessages(zookeeperAddr, msgHandler(), db)
 	}
-
 }
 
 func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {

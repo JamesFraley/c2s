@@ -12,7 +12,7 @@ import (
 	"github.com/wvanbergen/kafka/consumergroup"
 )
 
-const consumerGroup = "group.testing"
+const consumerGroup = "group.testing2"
 
 type messageHandler func(*sarama.ConsumerMessage, *sql.DB) error
 
