@@ -12,14 +12,14 @@ import (
 	"github.com/wvanbergen/kafka/consumergroup"
 )
 
-const consumerGroup = "group.testing2"
+const consumerGroup = "group.testing"
 
 type messageHandler func(*sarama.ConsumerMessage, *sql.DB) error
 
 func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB) {
 	log.Println("Starting Consumer")
 	config := consumergroup.NewConfig()
-	config.Offsets.Initial = sarama.OffsetOldest
+	config.Offsets.Initial = sarama.OffsetNewest
 	config.Offsets.ProcessingTimeout = 10 * time.Second
 
 	consumer, err := consumergroup.JoinConsumerGroup(consumerGroup, []string{topicName}, []string{zookeeperConn}, config)
