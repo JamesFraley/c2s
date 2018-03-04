@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -65,6 +66,16 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
 			return err
 		}
 
+		p := place{}
+		json.Unmarshal([]byte(m.Value), &p)
+		b, _ := json.Marshal(p)
+
+		log.Print("p------------------------------")
+		log.Print(p)
+		log.Print("p------------------------------")
+		log.Print(string(b[:]))
+		log.Printf("%T", string(b[:]))
+		log.Print("p------------------------------")
 		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
 		log.Printf("Headers=%s\n", m.Headers)
 		log.Printf("Key=%s\n", m.Key)
