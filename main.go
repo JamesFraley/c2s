@@ -30,6 +30,9 @@ func main() {
 	}
 	defer db.Close()
 
+	//http://go-database-sql.org/index.html
+	//Strangely enough, sql.open doesn't create a connection
+	//The db.ping will do it along with other sql & dml commands
 	if err = db.Ping(); err != nil {
 		fmt.Printf("Error connecting to the database: %s\n", err)
 		return
@@ -68,14 +71,9 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
 
 		p := place{}
 		json.Unmarshal([]byte(m.Value), &p)
-		b, _ := json.Marshal(p)
+		//b, _ := json.Marshal(p)
 
-		log.Print("p------------------------------")
-		log.Print(p)
-		log.Print("p------------------------------")
-		log.Print(string(b[:]))
-		log.Printf("%T", string(b[:]))
-		log.Print("p------------------------------")
+		log.Printf("P=%v", p)
 		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
 		log.Printf("Headers=%s\n", m.Headers)
 		log.Printf("Key=%s\n", m.Key)
