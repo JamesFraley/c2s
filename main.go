@@ -19,6 +19,7 @@ func main() {
 	oracleUser := os.Getenv("oracleUser")
 	oraclePassword := os.Getenv("oraclePassword")
 	oracleService := os.Getenv("oracleService")
+	kafkaConsumerAddr := os.Getenv("kafkaConsumerAddr")
 
 	oracleConnectString := oracleUser + "/" + oraclePassword + "@" + oracleService
 	db, err := sql.Open("oci8", oracleConnectString)
@@ -48,7 +49,7 @@ func main() {
 
 	for {
 		log.Print("Start consume.")
-		consumeMessages(zookeeperAddr, msgHandler(), db)
+		consumeMessages(kafkaConsumerAddr, msgHandler(), db)
 	}
 }
 

@@ -17,7 +17,9 @@
                  "zookeeperAddr":"127.0.0.1:9092", 
                  "oracleUser":"fraleyjd",
                  "oraclePassword":"myPassword", 
-                 "oracleService":"orcl"},
+                 "oracleService":"orcl",
+                 "kafkaConsumerAddr":"127.0.0.1:2181"
+                },
          "args": [],
          "showLog": true
       }
