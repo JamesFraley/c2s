@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	catalog "bitbucket.di2e.net/scm/pir/go-catalog-types.git"
 	"github.com/Shopify/sarama"
 	_ "github.com/mattn/go-oci8"
 )
@@ -71,34 +72,37 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
 			return err
 		}
 
-		p := place{}
-		// p.Name = "James Fraley"
-		// p.Addr.StreetAddr = "1823 Andrea Circle"
-		// p.Addr.City = "Beavercreek"
-		// p.Addr.State = "OH"
-		// p.Addr.Zipcode = 45432
-		// p.Point.Latitude = 45.1
-		// p.Point.Longitude = 90.2
-		// p.FavColors = []string{"a", "b", "c", "d"}
-		// b, _ := json.Marshal(p)
-		// log.Print(string(b[:]))
+		var record catalog.CatalogRecord
+		json.Unmarshal([]byte(m.Value), &record)
 
-		json.Unmarshal([]byte(m.Value), &p)
-		//b, _ := json.Marshal(m.Value)
 		log.Printf("%s", string(m.Value))
-		insertRow(p, db)
+		//insertRow(p, db)
 
-		log.Panicf("P=%v", p)
-		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
-		log.Printf("Headers=%s\n", m.Headers)
-		log.Printf("Key=%s\n", m.Key)
-		log.Printf("Offset=%d\n", m.Offset)
-		log.Printf("Partition=%v\n", m.Partition)
-		log.Printf("Timestamp=%s\n", m.Timestamp)
-		log.Printf("Topic=%s\n", m.Topic)
-		log.Printf("Value.typeOf()=%T\n", m.Value)
-		log.Printf("Value=%s\n", m.Value)
-		log.Printf("\n\n")
 		return nil
 	}
 }
+
+// p.Name = "James Fraley"
+// p.Addr.StreetAddr = "1823 Andrea Circle"
+// p.Addr.City = "Beavercreek"
+// p.Addr.State = "OH"
+// p.Addr.Zipcode = 45432
+// p.Point.Latitude = 45.1
+// p.Point.Longitude = 90.2
+// p.FavColors = []string{"a", "b", "c", "d"}
+// b, _ := json.Marshal(p)
+// log.Print(string(b[:]))
+
+//b, _ := json.Marshal(m.Value)
+
+// log.Panicf("P=%v", p)
+// log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
+// log.Printf("Headers=%s\n", m.Headers)
+// log.Printf("Key=%s\n", m.Key)
+// log.Printf("Offset=%d\n", m.Offset)
+// log.Printf("Partition=%v\n", m.Partition)
+// log.Printf("Timestamp=%s\n", m.Timestamp)
+// log.Printf("Topic=%s\n", m.Topic)
+// log.Printf("Value.typeOf()=%T\n", m.Value)
+// log.Printf("Value=%s\n", m.Value)
+// log.Printf("\n\n")
