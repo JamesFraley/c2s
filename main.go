@@ -88,7 +88,7 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
 		log.Printf("%s", string(m.Value))
 		insertRow(p, db)
 
-		log.Printf("P=%v", p)
+		log.Panicf("P=%v", p)
 		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)
 		log.Printf("Headers=%s\n", m.Headers)
 		log.Printf("Key=%s\n", m.Key)
