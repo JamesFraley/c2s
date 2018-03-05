@@ -70,8 +70,21 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
 		}
 
 		p := place{}
+		// p.Name = "James Fraley"
+		// p.Addr.StreetAddr = "1823 Andrea Circle"
+		// p.Addr.City = "Beavercreek"
+		// p.Addr.State = "OH"
+		// p.Addr.Zipcode = 45432
+		// p.Point.Latitude = 45.1
+		// p.Point.Longitude = 90.2
+		// p.FavColors = []string{"a", "b", "c", "d"}
+		// b, _ := json.Marshal(p)
+		// log.Print(string(b[:]))
+
 		json.Unmarshal([]byte(m.Value), &p)
-		//b, _ := json.Marshal(p)
+		//b, _ := json.Marshal(m.Value)
+		log.Printf("%s", string(m.Value))
+		insertRow(p, db)
 
 		log.Printf("P=%v", p)
 		log.Printf("BlockTimestamp=%s\n", m.BlockTimestamp)

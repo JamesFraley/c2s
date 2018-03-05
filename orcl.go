@@ -6,11 +6,18 @@ import (
 )
 
 func insertRow(p place, db *sql.DB) error {
-	stmt, err := db.Prepare("INSERT INTO place(name, address, city, population, latitiude, longitude) VALUES(?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO place(name, streetaddress, city, state, zipcode, latitude, longitude) VALUES(:1, :2, :3, :4, :5, :6, :7)")
 	if err != nil {
 		log.Fatal(err)
 	}
-	res, err := stmt.Exec(p.Name, p.Addr.StreetAddr, p.Addr.City)
+	res, err := stmt.Exec(
+		p.Name,
+		p.Addr.StreetAddr,
+		p.Addr.City,
+		p.Addr.State,
+		p.Addr.Zipcode,
+		p.Point.Latitude,
+		p.Point.Longitude)
 	if err != nil {
 		log.Fatal(err)
 	}
