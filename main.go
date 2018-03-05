@@ -22,25 +22,27 @@ func main() {
 	oracleService := os.Getenv("oracleService")
 	kafkaConsumerAddr := os.Getenv("kafkaConsumerAddr")
 
+	var db *sql.DB
+
 	oracleConnectString := oracleUser + "/" + oraclePassword + "@" + oracleService
 	db, err := sql.Open("oci8", oracleConnectString)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalf("Error opening oracle connection: %s\n", err)
+	} else {
+		defer db.Close()
 	}
-	defer db.Close()
 
 	//http://go-database-sql.org/index.html
 	//Strangely enough, sql.open doesn't create a connection
 	//The db.ping will do it along with other sql & dml commands
-	if err = db.Ping(); err != nil {
-		fmt.Printf("Error connecting to the database: %s\n", err)
-		return
+	if err := db.Ping(); err != nil {
+		db.Close()
+		log.Fatalf("Error connecting to the database: %s\n", err)
 	}
 
 	producer, err := createKafkaProducer(zookeeperAddr)
 	if err != nil {
-		log.Fatal("Failed to connect to Kafka")
+		log.Fatalf("Failed to connect to Kafka")
 	}
 
 	//Ensures that the topic has been created in kafka
@@ -51,10 +53,10 @@ func main() {
 		Timestamp: time.Now(),
 	}
 
-	for {
-		log.Print("Start consume.")
-		consumeMessages(kafkaConsumerAddr, msgHandler(), db)
-	}
+	//	for {
+	log.Print("Start consume.")
+	consumeMessages(kafkaConsumerAddr, msgHandler(), db)
+	//	}
 }
 
 func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
