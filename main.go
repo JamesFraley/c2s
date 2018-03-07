@@ -77,7 +77,7 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB) error {
 
 		loc := tfrmEnvlope.Catalog.Locations
 		log.Print(loc[0].Uri)
-		log.Print("------------------------------------------------------------------------------")
+		log.Print("--Inserting Row----------------------------------------------------------------------------")
 		insertRow(tfrmEnvlope, db)
 
 		//		json.Unmarshal([]byte(m.Value), &record)

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+kill -9 `ps -ef | grep kaf | grep -v grep | cut -d\  -f2`
 
 if [[ $1 = "erase" ]]; then
    echo Deleting
