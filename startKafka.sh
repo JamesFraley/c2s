@@ -1,28 +1,30 @@
 #!/bin/bash
 
-kill -9 `ps -ef | grep kaf | grep -v grep | cut -d\  -f2`
+kill -9 `ps -ef | grep kaf | grep -v grep | cut -d\  -f2` 2>/dev/null
 
 if [[ $1 = "erase" ]]; then
    echo Deleting
-   rm -Rf /tmp/zookeeper /tmp/kafka-logs 2>/dev/null
+   rm -Rf /tmp/zookeeper /tmp/kafka-logs 
 else
-   echo keeping
+   echo No flag
+   sleep 5
 fi
+
 
 echo Starting Zookeeper
 cd /home/fraleyjd/Downloads/kafka_2.11-0.10.1.0
 bin/zookeeper-server-start.sh config/zookeeper.properties >/home/fraleyjd/zookeeper.log 2>&1 &
-sleep 10
+sleep 5
 
 echo Starting Kafka
 cd /home/fraleyjd/Downloads/kafka_2.11-0.10.1.0
 bin/kafka-server-start.sh config/server.properties >/home/fraleyjd/kafka.log 2>&1 &
-sleep 10
+sleep 5
 
 echo Creating partition
 cd /home/fraleyjd/Downloads/kafka_2.11-0.10.1.0
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic place
-sleep 10
+sleep 5
 
 echo Starting Kafdrop
 cd /home/fraleyjd/projects/go/src/Kafdrop

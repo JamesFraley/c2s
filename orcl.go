@@ -2,12 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 )
 
 func insertRow(p TFRMCatalogEnvlope, db *sql.DB) error {
-	sqlStrg := `
+	insertSQL := `
 declare
    a_row iots_file_master%ROWTYPE;
    p_row iots_file_master%ROWTYPE;
@@ -20,7 +19,7 @@ begin
    p_row.checksum := :6;
    p_row.file_size := :7;
    p_row.uri_location := :8;
-   a_row := file_master_interface.register_file(p_row);
+	a_row := file_master_interface.register_file(p_row);
 end;`
 
 	meta := p.Catalog.Meta
@@ -39,31 +38,37 @@ end;`
 	p_file_origin := "APX"
 	p_checksum := md5
 	p_file_size := file_size
-	p_uri_location := loc[0].Uri
+	p_uri_location := loc[0].Uri //Must check for archive!!
 
-	pSQL, err := db.Prepare(sqlStrg)
-	defer pSQL.Close()
-	rows, err := pSQL.Query(p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, p_uri_location)
-	defer rows.Close()
-
-	for rows.Next() {
-		//var i int
-		fmt.Print("1")
-		//err = rows.Scan(&i)
-		// if err != nil {
-		// 	log.Fatal(err)
+	res, err := db.Exec(insertSQL, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, p_uri_location)
+	log.Print(res)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	fmt.Printf("err=%v\n", err)
-
-	// ret, err := db.Exec(sqlStrg, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, p_uri_location)
-	// log.Print(ret)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	selectSQL, err := db.Prepare("select filename from iots_file_master where source_filename=:1")
+	defer selectSQL.Close()
+	row := selectSQL.QueryRow(p_source_filename)
+	var filename string
+	err = row.Scan(&filename)
+	log.Printf("err=%s\n", err)
+	log.Printf("filename=%s\n", filename)
 
 	return nil
 }
+
+// pSQL, err := db.Prepare(sqlStrg)
+// defer pSQL.Close()
+// rows, err := pSQL.Exec(p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, p_uri_location)
+// defer rows.Close()
+// fmt.Printf("rows=%v\n", rows)
+
+//for rows.Next() {
+//var i int
+//err = rows.Scan(&i)
+// if err != nil {
+// 	log.Fatal(err)
+//}
 
 // var rowCount int
 // err = sql.QueryRow(p.Name).Scan(&rowCount)
