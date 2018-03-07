@@ -1,5 +1,19 @@
 package main
 
+import (
+	"bitbucket.di2e.net/scm/pir/go-catalog-types.git"
+)
+
+type (
+	TFRMCatalogRecord struct {
+		catalog.CatalogRecord
+	}
+
+	TFRMCatalogEnvlope struct {
+		Catalog TFRMCatalogRecord `json:"catalog,omitempty"`
+	}
+)
+
 type place struct {
 	Name      string   `json:"name"`
 	Addr      address  `json:"address,omitempty"`

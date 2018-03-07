@@ -33,14 +33,17 @@
             "uri": "file:/dfs/catalog/blue/ingest/catalog_test_064_006408.txt",
             "fileSize": 20,
             "sha1Hash": null,
-            "md5": null,
+            "md5": "1234567890",
             "name": null,
             "sensor": null,
             "extension": "txt",
             "lastmodified": "2018-03-05T21:42:41"
          },
          "metaProducer": null,
-         "classification": null,
+         "classification":{ "marking": "UNCLASSIFIED//NK//99X9",
+                            "classification": "U",
+                            "ownerProducer":"AX",
+                            "declassDate": null },
          "tasking": null,
          "collection": null,
          "tags": [],
@@ -63,7 +66,7 @@
             "validStart": "2018-03-05T21:42:54.688Z",
             "validEnd": null,
             "compression": null,
-            "md5": null,
+            "md5": "9876543210",
             "sha1": null
          }
       ]
