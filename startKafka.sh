@@ -1,15 +1,11 @@
 #!/bin/bash
 
-kill -9 `ps -ef | grep kaf | grep -v grep | cut -d\  -f2` 2>/dev/null
+typeset -i X=`ps -ef | grep kaf | grep -v grep | wc -l`
 
-if [[ $1 = "erase" ]]; then
-   echo Deleting
-   rm -Rf /tmp/zookeeper /tmp/kafka-logs 
-else
-   echo No flag
-   sleep 5
+if (( X>0 )); then
+   echo Kafka is already running
+   exit
 fi
-
 
 echo Starting Zookeeper
 cd /home/fraleyjd/Downloads/kafka_2.11-0.10.1.0

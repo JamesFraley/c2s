@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -45,6 +46,7 @@ end;`
 	for _, val := range loc {
 		if val.Name == "archive" {
 			p_uri_location = val.Uri
+			archiveFound = true
 		}
 	}
 
@@ -53,10 +55,22 @@ end;`
 		return nil
 	}
 
-	firstColon := strings.Index(p_uri_location, ":")
-	new_uri_location := p_uri_location[firstColon+1:]
-	new_uri_location = filepath.Dir(new_uri_location)
-	log.Printf("new_uri_location=%s\n", new_uri_location)
+	colonPos := strings.Index(p_uri_location, ":")
+	fileFQN := p_uri_location[colonPos+1:] //this removes the file:/
+	filePath := filepath.Dir(fileFQN)
+	log.Printf("filePath=%s\n", filePath)
+
+	base := "/c2s/prod"
+	lenBase := len(base)
+	var fileLocation string
+	if filePath[0:lenBase] == base {
+		fileLocation = filePath[lenBase:]
+	} else {
+		log.Printf("Bad file location.  base=%s\t\t filePath=%s\n", base, filePath)
+		log.Print(filePath[0:lenBase])
+		return nil
+	}
+	log.Print(fileLocation)
 
 	//
 	//   This section ensures the file hasn't already been processed.  That is an error.
@@ -80,7 +94,7 @@ end;`
 	//
 	// This section inserts the record into the database
 	//
-	_, err = db.Exec(insertSQL, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, new_uri_location)
+	_, err = db.Exec(insertSQL, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, fileLocation)
 	if err != nil {
 		log.Fatalf("Execution of register_file failed: %s\n", err)
 	}
@@ -103,6 +117,10 @@ end;`
 	}
 	log.Printf("The new filename is %s\n", filename)
 
+	//
+	//  This section creates the hard link
+	//
+	os.Link(filePath+"/"+source_filename, filePath+"/"+filename)
 	return nil
 }
 
