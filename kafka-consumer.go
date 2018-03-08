@@ -14,9 +14,9 @@ import (
 
 const consumerGroup = "group.testing"
 
-type messageHandler func(*sarama.ConsumerMessage, *sql.DB) error
+type messageHandler func(*sarama.ConsumerMessage, *sql.DB, []diskLoc) error
 
-func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB) {
+func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB, fileLocations []diskLoc) {
 	log.Println("Starting Consumer")
 	config := consumergroup.NewConfig()
 	config.Offsets.Initial = sarama.OffsetOldest
@@ -50,7 +50,7 @@ func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB) {
 	log.Println("Waiting for messages")
 	for message := range consumer.Messages() {
 		log.Printf("Topic: %s\t Partition: %v\t Offset: %v\n", message.Topic, message.Partition, message.Offset)
-		e := handler(message, db)
+		e := handler(message, db, fileLocations)
 		if e != nil {
 			log.Fatal(e)
 			consumer.Close()

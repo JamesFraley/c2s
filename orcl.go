@@ -8,14 +8,14 @@ import (
 	"strings"
 )
 
-func insertRow(p TFRMCatalogEnvlope, db *sql.DB) error {
+func insertRow(p TFRMCatalogEnvlope, db *sql.DB, fileLocations []diskLoc) error {
 	insertSQL := `
 declare
    a_row iots_file_master%ROWTYPE;
    p_row iots_file_master%ROWTYPE;
 begin
    p_row.source_filename := :1;
-   p_row.classification := :2;
+   p_row.classification_text := :2;
    p_row.state := :3;
    p_row.ifl_id := :4;
    p_row.file_origin := :5;
@@ -29,14 +29,12 @@ end;`
 	source_filename := (*meta).Source.FileName
 	file_size := (*meta).Source.FileSize
 	md5 := (*meta).Source.Md5
-	//class := (*meta).Classification
-	//marking := (*class).Marking
 	loc := p.Catalog.Locations
 
+	class := (*meta).Classification
+	p_classification_text := (*class).Marking
 	p_source_filename := source_filename
-	p_class := "1000"
 	p_state := "PROCESSED"
-	p_ifl_id := 1
 	p_file_origin := "APX"
 	p_checksum := md5
 	p_file_size := file_size
@@ -60,17 +58,21 @@ end;`
 	filePath := filepath.Dir(fileFQN)
 	log.Printf("filePath=%s\n", filePath)
 
-	base := "/c2s/prod"
-	lenBase := len(base)
+	p_ifl_id := -1
 	var fileLocation string
-	if filePath[0:lenBase] == base {
-		fileLocation = filePath[lenBase:]
-	} else {
-		log.Printf("Bad file location.  base=%s\t\t filePath=%s\n", base, filePath)
-		log.Print(filePath[0:lenBase])
+	for _, dl := range fileLocations {
+		lenBase := len(dl.absolute_path_unix)
+		if filePath[0:lenBase] == dl.absolute_path_unix {
+			fileLocation = filePath[lenBase:]
+			p_ifl_id = dl.ifl_id
+			break
+		}
+	}
+
+	if p_ifl_id == -1 {
+		log.Printf("Could not find the ifl_id. %s\n", filePath)
 		return nil
 	}
-	log.Print(fileLocation)
 
 	//
 	//   This section ensures the file hasn't already been processed.  That is an error.
@@ -94,7 +96,7 @@ end;`
 	//
 	// This section inserts the record into the database
 	//
-	_, err = db.Exec(insertSQL, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, fileLocation)
+	_, err = db.Exec(insertSQL, p_source_filename, p_classification_text, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, fileLocation)
 	if err != nil {
 		log.Fatalf("Execution of register_file failed: %s\n", err)
 	}

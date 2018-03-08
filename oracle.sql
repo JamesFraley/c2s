@@ -16,17 +16,17 @@ end;
 drop table fraleyjd.iots_file_master;
 
 create table IOTS_FILE_MASTER(
-   file_id             number(10,0)     not null,
-   file_version        number(10,0)     not null,
-   classification      varchar2(4 byte) not null,
-   state               varchar2(10)     not null,
-   ifl_id              number(2,0)      not null,
-   file_origin         varchar2(5)      not null,
-   checksum            varchar2(64)     not null,
-   file_size           number           not null,
-   uri_location        varchar2(200)    not null,
-   source_filename     varchar2(256)    not null unique,
-   filename            varchar2(256)    not null);
+   file_id             number(10,0)       not null,
+   file_version        number(10,0)       not null,
+   classification_text varchar2(255 BYTE) not null,
+   state               varchar2(10)       not null,
+   ifl_id              number(2,0)        not null,
+   file_origin         varchar2(5)        not null,
+   checksum            varchar2(64)       not null,
+   file_size           number             not null,
+   uri_location        varchar2(200)      not null,
+   source_filename     varchar2(256)      not null unique,
+   filename            varchar2(256)      not null);
 
 ======================================================================================
 
@@ -61,9 +61,9 @@ create or replace PACKAGE BODY file_master_interface AS
       select file_version_seq.nextval into curval.file_version from dual;
       curval.filename := to_char(curval.file_version) || '.' || curval.source_filename;
       insert into iots_file_master(file_id,
-                                  file_version,
-                                  classification,
-                                 state,
+                               file_version,
+                               classification_text,
+                               state,
                                ifl_id,
                                file_origin,
                                checksum,
@@ -73,7 +73,7 @@ create or replace PACKAGE BODY file_master_interface AS
                                filename)
                         values(curval.file_id,
                                curval.file_version,
-                               curval.classification,
+                               curval.classification_text,
                                curval.state,
                                curval.ifl_id,
                                curval.file_origin,
@@ -104,4 +104,45 @@ begin
    a_row := file_master_interface.register_file(p_row);
 end;
 /
+
+
+======================================================================================
+
+create table iots_file_locations (
+  ifl_id             number(2,0),
+  tier               varchar2(5),
+  disk_type          varchar2(8),
+  network            varchar2(16),
+  absolute_path_unix varchar2(128),
+  absolute_path_win  varchar2(128),
+  seclab             number(11,0),
+  created            timestamp(6),
+  created_by         varchar2(30),
+  last_updated       timestamp(6),
+  last_updated_by    varchar2(30)
+);
+
+
+======================================================================================
+
+
+truncate table iots_file_locations;
+
+select * from iots_file_locations;
+
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+                         values( 1,    'TIER1', 'C2S',     'UNKNOWN',   '/iots/test',     '\\ifmfs1\iots\test', '1000');
+                         
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+                         values( 2,    'TIER2', 'C2S',     'UNKNOWN',   '/iots/train',     '\\ifmfs1\iots\train', '1000');
+                         
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+                         values( 3,    'TIER3', 'C2S',     'UNKNOWN',   '/iots/prod',         '\\ifmfs1\iots\prod', '1000');
+                         
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+                         values( 4,    'TIER4', 'C2S',     'UNKNOWN',   '/c2s/train',         '\\ifmfs1\c2s\train', '1000');
+                         
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+                         values( 5,    'TIER5', 'C2S',     'UNKNOWN',   '/c2s/prod',         '\\ifmfs1\c2s\prod', '1000');
+                         
 
