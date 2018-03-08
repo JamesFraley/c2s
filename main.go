@@ -46,8 +46,8 @@ func main() {
 	consumeMessages(kafkaConsumerAddr, msgHandler(), db, fileLocations)
 }
 
-func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []diskLoc) error {
-	return func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []diskLoc) error {
+func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []iflLocation) error {
+	return func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []iflLocation) error {
 		// Empty body means it is an init message
 		if len(m.Value) == 0 {
 			return nil
@@ -66,27 +66,28 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []di
 			log.Printf("err=%s\n", err)
 		}
 
+		log.Print("--Message Value----------------------------------------------------------------------------")
 		log.Printf("%s", string(m.Value))
-		log.Print("------------------------------------------------------------------------------")
-		meta := tfrmEnvlope.Catalog.Meta
-		log.Printf("SOURCE_FILENAME=%s\n", (*meta).Source.FileName)
-		log.Printf("FILESIZE=%d\n", (*meta).Source.FileSize)
-		log.Printf("MD5=%s\n", (*meta).Source.Md5)
-
-		class := (*meta).Classification
-		marking := (*class).Marking
-		log.Printf("CLASSIFICATION=%s\n", marking)
-
-		loc := tfrmEnvlope.Catalog.Locations
-		log.Print(loc[0].Uri)
-		log.Print("--Inserting Row----------------------------------------------------------------------------")
+		log.Print("-----------------------------------------------")
+		//meta := tfrmEnvlope.Catalog.Meta
 		insertRow(tfrmEnvlope, db, fileLocations)
 		return nil
+		// log.Printf("SOURCE_FILENAME=%s\n", (*meta).Source.FileName)
+		// log.Printf("FILESIZE=%d\n", (*meta).Source.FileSize)
+		// log.Printf("MD5=%s\n", (*meta).Source.Md5)
+
+		// class := (*meta).Classification
+		// marking := (*class).Marking
+		// log.Printf("CLASSIFICATION=%s\n", marking)
+
+		// loc := tfrmEnvlope.Catalog.Locations
+		// log.Print(loc[0].Uri)
 	}
 }
 
-func loadIFL(db *sql.DB) ([]diskLoc, error) {
-	var retVal []diskLoc
+func loadIFL(db *sql.DB) ([]iflLocation, error) {
+	log.Print("Starting loadIFL")
+	var retVal []iflLocation
 
 	selectSQL, err := db.Prepare("select ifl_id, absolute_path_unix from iots_file_locations")
 	defer selectSQL.Close()
@@ -101,14 +102,15 @@ func loadIFL(db *sql.DB) ([]diskLoc, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var ifl_id int
-		var absolute_path_unix string
-		err = rows.Scan(&ifl_id, &absolute_path_unix)
+		var iflID int
+		var absolutePathUnix string
+		err = rows.Scan(&iflID, &absolutePathUnix)
 		if err != nil {
 			log.Fatalf("Unable to scan iots_file_locations. %s\n", err)
 		}
-		dl := diskLoc{ifl_id: ifl_id, absolute_path_unix: absolute_path_unix}
+		dl := iflLocation{iflID: iflID, absolutePathUnix: absolutePathUnix}
 		retVal = append(retVal, dl)
 	}
+	log.Print("Exiting loadIFL")
 	return retVal, nil
 }

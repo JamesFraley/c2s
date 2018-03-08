@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func insertRow(p TFRMCatalogEnvlope, db *sql.DB, fileLocations []diskLoc) error {
+func insertRow(catalogEnvlope TFRMCatalogEnvlope, db *sql.DB, fileLocations []iflLocation) error {
 	insertSQL := `
 declare
    a_row iots_file_master%ROWTYPE;
@@ -25,52 +25,57 @@ begin
 	a_row := file_master_interface.register_file(p_row);
 end;`
 
-	meta := p.Catalog.Meta
-	source_filename := (*meta).Source.FileName
-	file_size := (*meta).Source.FileSize
-	md5 := (*meta).Source.Md5
-	loc := p.Catalog.Locations
+	var newFile ifmRecord
 
+	meta := catalogEnvlope.Catalog.Meta
 	class := (*meta).Classification
-	p_classification_text := (*class).Marking
-	p_source_filename := source_filename
-	p_state := "PROCESSED"
-	p_file_origin := "APX"
-	p_checksum := md5
-	p_file_size := file_size
+	newFile.classificationText = (*class).Marking
+	newFile.sourceFilename = meta.Source.FileName
+	newFile.processingState = "PROCESSED"
+	newFile.fileOrigin = "APX"
+	newFile.checksum = meta.Source.Md5
+	newFile.fileSize = (*meta).Source.FileSize
 
-	var p_uri_location string
+	//
+	//  Compare the filepath to the ifl table to see
+	//    if there is an existing IFL_ID
+	//
+	loc := catalogEnvlope.Catalog.Locations
+	var uriLocation string
 	archiveFound := false
 	for _, val := range loc {
-		if val.Name == "archive" {
-			p_uri_location = val.Uri
+		if val.Name == "archive" { //
+			uriLocation = val.Uri
 			archiveFound = true
 		}
 	}
 
 	if archiveFound == false {
-		log.Printf("No archive location found for: %s\n", p_source_filename)
+		log.Printf("No archive location found for: %s\n", newFile.sourceFilename)
 		return nil
 	}
 
-	colonPos := strings.Index(p_uri_location, ":")
-	fileFQN := p_uri_location[colonPos+1:] //this removes the file:/
-	filePath := filepath.Dir(fileFQN)
-	log.Printf("filePath=%s\n", filePath)
+	//
+	// The full file path comes in with file:/<directory>/filename
+	//    This little bit of code get it down to just the <directory>
+	//
+	colonPos := strings.Index(uriLocation, ":")
+	fileFQN := uriLocation[colonPos+1:]          //this removes the file:/
+	newFile.fullFilePath = filepath.Dir(fileFQN) //this removes the filename
 
-	p_ifl_id := -1
-	var fileLocation string
+	iflIDFound := false
 	for _, dl := range fileLocations {
-		lenBase := len(dl.absolute_path_unix)
-		if filePath[0:lenBase] == dl.absolute_path_unix {
-			fileLocation = filePath[lenBase:]
-			p_ifl_id = dl.ifl_id
+		lenBase := len(dl.absolutePathUnix)
+		if newFile.fullFilePath[0:lenBase] == dl.absolutePathUnix {
+			newFile.uriLocation = newFile.fullFilePath[lenBase:]
+			newFile.iflID = dl.iflID
+			iflIDFound = true
 			break
 		}
 	}
 
-	if p_ifl_id == -1 {
-		log.Printf("Could not find the ifl_id. %s\n", filePath)
+	if iflIDFound == false {
+		log.Printf("Could not find the ifl_id. %s\n", newFile.fullFilePath)
 		return nil
 	}
 
@@ -81,22 +86,23 @@ end;`
 	if err != nil {
 		log.Fatalf("Failed to Prepare: \"select sum(1) ROWCOUNT from iots_file_master where source_filename=:1\": %s\n", err)
 	}
-	defer selectSQL.Close()
-	row := selectSQL.QueryRow(p_source_filename)
+	row := selectSQL.QueryRow(newFile.sourceFilename)
+	selectSQL.Close()
 	var rowCount int
 	err = row.Scan(&rowCount)
 	if err != nil {
-		log.Fatalf("Failed to retrieve rowcount for %s. err=%s\n", p_source_filename, err)
+		log.Fatalf("Failed to retrieve rowcount for %s. err=%s\n", newFile.sourceFilename, err)
 	}
 	if rowCount > 0 {
-		log.Printf("%s has been previously processed", p_source_filename)
+		log.Printf("%s has been previously processed", newFile.sourceFilename)
 		return nil
 	}
 
 	//
 	// This section inserts the record into the database
 	//
-	_, err = db.Exec(insertSQL, p_source_filename, p_classification_text, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, fileLocation)
+	//_, err = db.Exec(insertSQL, p_source_filename,      p_classification_text,      p_state,                 p_ifl_id,      p_file_origin,       p_checksum,       p_file_size,      fileLocation)
+	_, err = db.Exec(insertSQL, newFile.sourceFilename, newFile.classificationText, newFile.processingState, newFile.iflID, "APX", newFile.checksum, newFile.fileSize, newFile.uriLocation)
 	if err != nil {
 		log.Fatalf("Execution of register_file failed: %s\n", err)
 	}
@@ -111,18 +117,20 @@ end;`
 		log.Fatalf("Failed to query the version number. %s\n", err)
 	}
 
-	row = selectSQL.QueryRow(p_source_filename)
-	var filename string
-	err = row.Scan(&filename)
+	row = selectSQL.QueryRow(newFile.sourceFilename)
+	var filenameWithVersion string
+	err = row.Scan(&filenameWithVersion)
 	if err != nil {
 		log.Fatalf("Failed to scan the version number. %s\n", err)
 	}
-	log.Printf("The new filename is %s\n", filename)
+	newFile.fnWithVersion = filenameWithVersion
+	log.Printf("The new filename is %s\n", filenameWithVersion)
 
 	//
 	//  This section creates the hard link
 	//
-	os.Link(filePath+"/"+source_filename, filePath+"/"+filename)
+	os.Link(newFile.fullFilePath+"/"+newFile.sourceFilename, newFile.fullFilePath+"/"+filenameWithVersion)
+	log.Print(newFile)
 	return nil
 }
 

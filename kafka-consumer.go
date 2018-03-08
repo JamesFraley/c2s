@@ -14,9 +14,9 @@ import (
 
 const consumerGroup = "group.testing"
 
-type messageHandler func(*sarama.ConsumerMessage, *sql.DB, []diskLoc) error
+type messageHandler func(*sarama.ConsumerMessage, *sql.DB, []iflLocation) error
 
-func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB, fileLocations []diskLoc) {
+func consumeMessages(zookeeperConn string, handler messageHandler, db *sql.DB, fileLocations []iflLocation) {
 	log.Println("Starting Consumer")
 	config := consumergroup.NewConfig()
 	config.Offsets.Initial = sarama.OffsetOldest
