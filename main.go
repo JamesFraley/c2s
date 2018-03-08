@@ -85,11 +85,6 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []di
 	}
 }
 
-type diskLoc struct {
-	ifl_id             int
-	absolute_path_unix string
-}
-
 func loadIFL(db *sql.DB) ([]diskLoc, error) {
 	var retVal []diskLoc
 

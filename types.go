@@ -4,6 +4,11 @@ import (
 	"bitbucket.di2e.net/scm/pir/go-catalog-types.git"
 )
 
+type diskLoc struct {
+	ifl_id             int
+	absolute_path_unix string
+}
+
 type (
 	TFRMCatalogRecord struct {
 		catalog.CatalogRecord
