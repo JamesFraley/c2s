@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"log"
+	"path/filepath"
+	"strings"
 )
 
 func insertRow(p TFRMCatalogEnvlope, db *sql.DB) error {
@@ -29,7 +31,6 @@ end;`
 	//class := (*meta).Classification
 	//marking := (*class).Marking
 	loc := p.Catalog.Locations
-	log.Print(loc[0].Uri)
 
 	p_source_filename := source_filename
 	p_class := "1000"
@@ -38,21 +39,69 @@ end;`
 	p_file_origin := "APX"
 	p_checksum := md5
 	p_file_size := file_size
-	p_uri_location := loc[0].Uri //Must check for archive!!
 
-	res, err := db.Exec(insertSQL, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, p_uri_location)
-	log.Print(res)
-	if err != nil {
-		log.Fatal(err)
+	var p_uri_location string
+	archiveFound := false
+	for _, val := range loc {
+		if val.Name == "archive" {
+			p_uri_location = val.Uri
+		}
 	}
 
-	selectSQL, err := db.Prepare("select filename from iots_file_master where source_filename=:1")
+	if archiveFound == false {
+		log.Printf("No archive location found for: %s\n", p_source_filename)
+		return nil
+	}
+
+	firstColon := strings.Index(p_uri_location, ":")
+	new_uri_location := p_uri_location[firstColon+1:]
+	new_uri_location = filepath.Dir(new_uri_location)
+	log.Printf("new_uri_location=%s\n", new_uri_location)
+
+	//
+	//   This section ensures the file hasn't already been processed.  That is an error.
+	//
+	selectSQL, err := db.Prepare("select nvl(sum(1),0) from iots_file_master where source_filename=:1")
+	if err != nil {
+		log.Fatalf("Failed to Prepare: \"select sum(1) ROWCOUNT from iots_file_master where source_filename=:1\": %s\n", err)
+	}
 	defer selectSQL.Close()
 	row := selectSQL.QueryRow(p_source_filename)
+	var rowCount int
+	err = row.Scan(&rowCount)
+	if err != nil {
+		log.Fatalf("Failed to retrieve rowcount for %s. err=%s\n", p_source_filename, err)
+	}
+	if rowCount > 0 {
+		log.Printf("%s has been previously processed", p_source_filename)
+		return nil
+	}
+
+	//
+	// This section inserts the record into the database
+	//
+	_, err = db.Exec(insertSQL, p_source_filename, p_class, p_state, p_ifl_id, p_file_origin, p_checksum, p_file_size, new_uri_location)
+	if err != nil {
+		log.Fatalf("Execution of register_file failed: %s\n", err)
+	}
+
+	//
+	//  This section retrieves the file name with the version number prepended.
+	//    The value is necessary to create the OS link
+	//
+	selectSQL, err = db.Prepare("select filename from iots_file_master where source_filename=:1")
+	defer selectSQL.Close()
+	if err != nil {
+		log.Fatalf("Failed to query the version number. %s\n", err)
+	}
+
+	row = selectSQL.QueryRow(p_source_filename)
 	var filename string
 	err = row.Scan(&filename)
-	log.Printf("err=%s\n", err)
-	log.Printf("filename=%s\n", filename)
+	if err != nil {
+		log.Fatalf("Failed to scan the version number. %s\n", err)
+	}
+	log.Printf("The new filename is %s\n", filename)
 
 	return nil
 }

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "0.4",
+  "header": {
+    "time": "2018-03-05T21:42:54.677Z",
+    "id": "ea27da51-4484-4b2c-928b-fab15e9b5cbe",
+    "producer": {
+      "name": "mobius.feed1.scout",
+      "node": "b6843d21196e",
+      "version": "0.0.1-SNAPSHOT"
+    }
+  },
+  "history": [],
+  "catalog": {
+    "id": null,
+    "version": null,
+    "schemaVersion": "1.4.0",
+    "dataType": "cbftest",
+    "meta": {
+      "targets": null,
+      "site": null,
+      "source": {
+        "fileName": "catalog_test_FPAHERE_SNHERE.txt",
+        "fileFormat": null,
+        "fileSource": null,
+        "productId": "a8bbc6a1-8d47-4826-ae8f-1f6330bc0d3a",
+        "countries": null,
+        "sensors": null,
+        "requirements": null,
+        "agency": null,
+        "provider": null,
+        "deliveryTime": null,
+        "discoveredTime": "2018-03-05T21:42:54.688Z",
+        "uri": "file:/ifs/data/catalog_test_FPAHERE_SNHERE.txt",
+        "fileSize": 20,
+        "sha1Hash": null,
+        "md5": "1234567890",
+        "name": null,
+        "sensor": null,
+        "extension": "txt",
+        "lastmodified": "2018-03-05T21:42:41"
+      },
+      "metaProducer": null,
+      "classification": {
+        "marking": "UNCLASSIFIED//NK//99X9",
+        "classification": "U",
+        "ownerProducer": "AX",
+        "declassDate": null
+      },
+      "tasking": null,
+      "collection": null,
+      "tags": [],
+      "extensible": null,
+      "start": null,
+      "end": null,
+      "created": null,
+      "updated": null,
+      "distribution": null,
+      "dissemination": null,
+      "comments": [],
+      "description": null,
+      "geom": null
+    },
+    "locations": [
+      {
+        "name": "source",
+        "uri": "file:/ifs/source/catalog_test_FPAHERE_SNHERE.txt",
+        "fileSize": 20,
+        "validStart": "2018-03-05T21:42:54.688Z",
+        "validEnd": null,
+        "compression": null,
+        "md5": "9876543210",
+        "sha1": null
+      },
+      {
+        "name": "cache",
+        "uri": "file:/ifs/cache/catalog_test_FPAHERE_SNHERE.txt",
+        "fileSize": 20,
+        "validStart": "2018-03-05T21:42:54.688Z",
+        "validEnd": null,
+        "compression": null,
+        "md5": "9876543210",
+        "sha1": null
+      }
+    ]
+  }
+}
