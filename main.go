@@ -69,19 +69,8 @@ func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []if
 		log.Print("--Message Value----------------------------------------------------------------------------")
 		log.Printf("%s", string(m.Value))
 		log.Print("-----------------------------------------------")
-		//meta := tfrmEnvlope.Catalog.Meta
 		insertRow(tfrmEnvlope, db, fileLocations)
 		return nil
-		// log.Printf("SOURCE_FILENAME=%s\n", (*meta).Source.FileName)
-		// log.Printf("FILESIZE=%d\n", (*meta).Source.FileSize)
-		// log.Printf("MD5=%s\n", (*meta).Source.Md5)
-
-		// class := (*meta).Classification
-		// marking := (*class).Marking
-		// log.Printf("CLASSIFICATION=%s\n", marking)
-
-		// loc := tfrmEnvlope.Catalog.Locations
-		// log.Print(loc[0].Uri)
 	}
 }
 

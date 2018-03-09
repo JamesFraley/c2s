@@ -121,8 +121,10 @@ end;`
 	var filenameWithVersion string
 	err = row.Scan(&filenameWithVersion)
 	if err != nil {
+		selectSQL.Close()
 		log.Fatalf("Failed to scan the version number. %s\n", err)
 	}
+	selectSQL.Close()
 	newFile.fnWithVersion = filenameWithVersion
 	log.Printf("The new filename is %s\n", filenameWithVersion)
 
