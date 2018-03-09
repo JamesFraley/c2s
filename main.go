@@ -15,15 +15,21 @@ import (
 var topicName string
 
 func main() {
-	topicName = os.Getenv("topicName")
+	// userID/Password@HOST-NAME:1521/OracleServiceName
 	oracleUser := os.Getenv("oracleUser")
 	oraclePassword := os.Getenv("oraclePassword")
+	oracleHost := os.Getenv("oracleHost")
+	oraclePort := os.Getenv("oraclePort")
 	oracleService := os.Getenv("oracleService")
 	kafkaConsumerAddr := os.Getenv("kafkaConsumerAddr")
+	topicName = os.Getenv("topicName")
 
 	var db *sql.DB
 
-	oracleConnectString := oracleUser + "/" + oraclePassword + "@" + oracleService
+	//oracleConnectString := oracleUser + "/" + oraclePassword + "@" + oracleService
+	//db, err := sql.Open("oci8", oracleConnectString)
+
+	oracleConnectString := oracleUser + "/" + oraclePassword + "@" + oracleHost + ":" + oraclePort + "/" + oracleService
 	db, err := sql.Open("oci8", oracleConnectString)
 	if err != nil {
 		log.Fatalf("Error opening oracle connection: %s\n", err)

@@ -13,12 +13,15 @@
          "port": 2345,
          "host": "127.0.0.1",
          "program": "${fileDirname}",
-         "env": {"topicName":"place", 
-                 "zookeeperAddr":"127.0.0.1:9092", 
-                 "oracleUser":"fraleyjd",
-                 "oraclePassword":"myPassword", 
+         "env": {"oracleUser":"fraleyjd",
+                "oraclePassword":"myPassword", 
+                "oracleHost":"10.103.20.161",
+                "oraclePort":"1521",
+                "oracleService":"orcl.altamiracorp.com",
+                "topicName":"place", 
                  "oracleService":"orcl",
-                 "kafkaConsumerAddr":"127.0.0.1:2181"
+                 "kafkaConsumerAddr":"127.0.0.1:2181",
+                 "zookeeperAddr":"127.0.0.1:9092"
                 },
          "args": [],
          "showLog": true

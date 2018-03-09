@@ -11,8 +11,11 @@ cd ./data/
 INSTANCE=`shuf -i 1000000-9999999 -n 1`
 FPAHERE=`shuf -i 1000000-9999999 -n 1`
  SNHERE=`shuf -i 1000000-9999999 -n 1`
+   DAYN=`shuf -i 1-31 -n 1`
+DAY=`printf "%02d\n" $DAYN`
+echo $DAY
 
-filePath=/c2s/prod/data/cbf/tfrm/2018/03/08
+filePath=/c2s/prod/data/cbf/tfrm/2018/03/$DAY
 outFile=20180308_0953_$FPAHERE_$SNHERE.txt
 
 sed -e s/FNHERE/$outFile/g    $inFile  > tmp.$INSTANCE.json
