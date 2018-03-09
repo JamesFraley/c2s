@@ -1,0 +1,3 @@
+[submodule "sarama"]
+	path = sarama
+	url = https://github.com/Shopify/sarama.git
