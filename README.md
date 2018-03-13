@@ -81,9 +81,9 @@ C: Run the program stand alone:
 	  
 D:
 
-docker run -v /home/fraleyjd/go/src/c2s:/config -v /c2s:/c2s c2s:0.0.1
+docker build . -t c2s:0.0.1
 
-
+docker run -v /home/fraleyjd/go/src/c2s:/config -v /c2s:/data c2s:0.0.1
 
 REFERENCES:
 	https://github.com/mattn/go-oci8

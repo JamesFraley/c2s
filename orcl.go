@@ -131,7 +131,10 @@ end;`
 	//
 	//  This section creates the hard link
 	//
-	os.Link(newFile.fullFilePath+"/"+newFile.sourceFilename, newFile.fullFilePath+"/"+filenameWithVersion)
+	err = os.Link(newFile.fullFilePath+"/"+newFile.sourceFilename, newFile.fullFilePath+"/"+filenameWithVersion)
+	if err != nil {
+		log.Printf("Failed to link to new filename")
+	}
 	log.Print(newFile)
 	return nil
 }
