@@ -24,7 +24,7 @@ cat tmp2.$INSTANCE.json | tr -d '\n'             > input_file.$INSTANCE.json
 
 echo `date +"%F %T"` > $filePath/$outFile
 
-/home/fraleyjd/Downloads/kafka_2.11-0.10.1.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic place < input_file.$INSTANCE.json
+/opt/kafka_2.11-0.10.1.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic c2s < input_file.$INSTANCE.json
 
 rm -f tmp.$INSTANCE.json tmp2.$INSTANCE.json input_file.$INSTANCE.json
 

@@ -1,12 +1,21 @@
-create user c2s identified by myPassword quota unlimited on users;
-grant connect to c2s;
-grant create table to c2s;
-grant create procedure to c2s;
-grant create sequence to c2s;
+--
+create table t(
+  file_id number,
+  file_name varchar2(200));
 
-drop table c2s.iots_file_master;
+create or replace procedure testInsert(file_id IN NUMBER, file_name IN varchar2) as
+begin
+  insert into t(file_id, file_name) values (file_id, file_name);
+  commit;
+end;
+/
 
-create table c2s.IOTS_FILE_MASTER(
+
+======================================================================================
+
+drop table fraleyjd.iots_file_master;
+
+create table IOTS_FILE_MASTER(
    file_id             number(10,0)       not null,
    file_version        number(10,0)       not null,
    classification_text varchar2(255 BYTE) not null,
@@ -19,31 +28,31 @@ create table c2s.IOTS_FILE_MASTER(
    source_filename     varchar2(256)      not null unique,
    filename            varchar2(256)      not null);
 
---======================================================================================
+======================================================================================
 
-drop sequence c2s.file_id_seq;
-drop sequence c2s.file_version_seq;
+drop sequence fraleyjd.file_id_seq;
+drop sequence fraleyjd.file_version_seq;
 
-CREATE SEQUENCE c2s.file_id_seq
+CREATE SEQUENCE file_id_seq
   START WITH 1
   INCREMENT BY 1
   CACHE 10;
 
-CREATE SEQUENCE c2s.file_version_seq
+CREATE SEQUENCE file_version_seq
   START WITH 1
   INCREMENT BY 1
   CACHE 10;
 
---======================================================================================
+======================================================================================
 
-CREATE OR REPLACE PACKAGE c2s.file_master_interface AS
+CREATE OR REPLACE PACKAGE file_master_interface AS
   function register_file(p_row in iots_file_master%ROWTYPE) return iots_file_master%ROWTYPE;
 END file_master_interface;
 /
 
---===================================================
+===================================================
 
-create or replace PACKAGE BODY c2s.file_master_interface AS
+create or replace PACKAGE BODY file_master_interface AS
    FUNCTION register_file(p_row IN iots_file_master%ROWTYPE) return iots_file_master%ROWTYPE IS
       curval iots_file_master%ROWTYPE;
    BEGIN
@@ -78,9 +87,28 @@ create or replace PACKAGE BODY c2s.file_master_interface AS
 END  file_master_interface;
 /
 
---======================================================================================
+======================================================================================
 
-create table c2s.iots_file_locations (
+declare
+   a_row iots_file_master%ROWTYPE;
+   p_row iots_file_master%ROWTYPE;
+begin
+   p_row.source_filename := 'jims_file2';
+   p_row.classification := '1000';
+   p_row.state := 'PROCESSED';
+   p_row.ifl_id := 1;
+   p_row.file_origin := 'APX';
+   p_row.checksum := '10923847';
+   p_row.file_size := 120;
+   p_row.uri_location := '/iots/prod/somewhere';
+   a_row := file_master_interface.register_file(p_row);
+end;
+/
+
+
+======================================================================================
+
+create table iots_file_locations (
   ifl_id             number(2,0),
   tier               varchar2(5),
   disk_type          varchar2(8),
@@ -95,43 +123,26 @@ create table c2s.iots_file_locations (
 );
 
 
---======================================================================================
+======================================================================================
 
-insert into c2s.IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+
+truncate table iots_file_locations;
+
+select * from iots_file_locations;
+
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
                          values( 1,    'TIER1', 'C2S',     'UNKNOWN',   '/iots/test',     '\\ifmfs1\iots\test', '1000');
                          
-insert into c2s.IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
                          values( 2,    'TIER2', 'C2S',     'UNKNOWN',   '/iots/train',     '\\ifmfs1\iots\train', '1000');
                          
-insert into c2s.IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
                          values( 3,    'TIER3', 'C2S',     'UNKNOWN',   '/iots/prod',         '\\ifmfs1\iots\prod', '1000');
                          
-insert into c2s.IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
                          values( 4,    'TIER4', 'C2S',     'UNKNOWN',   '/c2s/train',         '\\ifmfs1\c2s\train', '1000');
                          
-insert into c2s.IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
+insert into IOTS_FILE_LOCATIONS(ifl_id, tier,   disk_type, network,    absolute_path_unix, absolute_path_win,     seclab)
                          values( 5,    'TIER5', 'C2S',     'UNKNOWN',   '/c2s/prod',         '\\ifmfs1\c2s\prod', '1000');
                          
-commit;
 
-
---======================================================================================
---
--- This is used to test the package
---
---declare
---   a_row iots_file_master%ROWTYPE;
---   p_row iots_file_master%ROWTYPE;
---begin
---   p_row.source_filename := 'jims_file2';
---   p_row.classification := '1000';
---   p_row.state := 'PROCESSED';
---   p_row.ifl_id := 1;
---   p_row.file_origin := 'APX';
---   p_row.checksum := '10923847';
---   p_row.file_size := 120;
---   p_row.uri_location := '/iots/prod/somewhere';
---   a_row := file_master_interface.register_file(p_row);
---end;
---/
---======================================================================================
