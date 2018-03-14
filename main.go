@@ -21,7 +21,8 @@ func main() {
 	oracleHost := os.Getenv("oracleHost")
 	oraclePort := os.Getenv("oraclePort")
 	oracleService := os.Getenv("oracleService")
-	kafkaConsumerAddr := os.Getenv("kafkaConsumerAddr")
+	zookeeperAddr := os.Getenv("zookeeperAddr")
+	//kafkaConsumerAddr := os.Getenv("kafkaConsumerAddr")
 	topicName = os.Getenv("topicName")
 
 	var db *sql.DB
@@ -49,7 +50,7 @@ func main() {
 	}
 
 	log.Print("Start consume.")
-	consumeMessages(kafkaConsumerAddr, msgHandler(), db, fileLocations)
+	consumeMessages(zookeeperAddr, msgHandler(), db, fileLocations)
 }
 
 func msgHandler() func(m *sarama.ConsumerMessage, db *sql.DB, fileLocations []iflLocation) error {

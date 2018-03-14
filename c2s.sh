@@ -1,6 +1,6 @@
 export PATH=/usr/lib/oracle/12.2/client64/bin:$PATH
 export LD_LIBRARY_PATH=/usr/lib/oracle/12.2/client64/lib/:$LD_LIBRARY_PATH
-source /config/c2s.config
+source ./config/c2s.config
 
 echo oracleuser=$oracleUser
 echo oraclePassword=$oraclePassword

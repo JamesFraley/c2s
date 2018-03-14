@@ -1,9 +1,0 @@
-ORCL =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 10.103.20.161)(PORT = 1521))
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SERVICE_NAME = orcl.altamiracorp.com)
-    )
-  )
-
